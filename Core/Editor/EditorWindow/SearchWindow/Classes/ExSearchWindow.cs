@@ -63,7 +63,7 @@ namespace RenownedGames.ExLibEditor.Windows
                     if (!groups.Contains(group))
                     {
                         treeEntries.Add(new SearchTreeGroupEntry(new GUIContent(path), j + 1));
-                        groups.Add(path);
+                        groups.Add(group);
                     }
                     group += "/";
                 }
@@ -188,7 +188,7 @@ namespace RenownedGames.ExLibEditor.Windows
         private int SortEntriesByGroup(Entry lhs, Entry rhs)
         {
             string[] lhsPaths = lhs.content.text.Split('/');
-            string[] rhsPaths = lhs.content.text.Split('/');
+            string[] rhsPaths = rhs.content.text.Split('/');
 
             int lhsLength = lhsPaths.Length;
             int rhsLength = rhsPaths.Length;
