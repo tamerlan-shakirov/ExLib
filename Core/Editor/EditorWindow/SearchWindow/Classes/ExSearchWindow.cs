@@ -192,24 +192,26 @@ namespace RenownedGames.ExLibEditor.Windows
 
             int lhsLength = lhsPaths.Length;
             int rhsLength = rhsPaths.Length;
+            int minLength = Mathf.Min(lhsLength, rhsLength);
 
-            for (int i = 0; i < lhsPaths.Length; i++)
+            for (int i = 0; i < minLength; i++)
             {
-                if (i >= rhsLength)
+                if (minLength - 1 == i)
                 {
-                    return 1;
+                    int compareDepth = rhsLength.CompareTo(lhsLength);
+                    if (compareDepth != 0)
+                    {
+                        return compareDepth;
+                    }
                 }
 
-                int value = lhsPaths[i].CompareTo(rhsPaths[i]);
-                if (value == 0)
+                int compareText = lhsPaths[i].CompareTo(rhsPaths[i]);
+                if (compareText != 0)
                 {
-                    if (lhsLength != rhsLength && (i == lhsLength - 1 || i == rhsLength - 1))
-                    {
-                        return lhsLength < rhsLength ? 1 : -1;
-                    }
-                    return value;
+                    return compareText;
                 }
             }
+
             return 0;
         }
 
