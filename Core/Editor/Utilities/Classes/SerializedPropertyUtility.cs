@@ -13,8 +13,9 @@ using UnityEditor;
 
 namespace RenownedGames.ExLibEditor
 {
-    public static class SerializedPropertyExtensions
+    public static class SerializedPropertyUtility
     {
+        #region [Extension Methods]
         /// <summary>
         /// Get parent of serialized property.
         /// </summary>
@@ -54,5 +55,6 @@ namespace RenownedGames.ExLibEditor
                 while (currentProperty.NextVisible(false));
             }
         }
+        #endregion
     }
 }
