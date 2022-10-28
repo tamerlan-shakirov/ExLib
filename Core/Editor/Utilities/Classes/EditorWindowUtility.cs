@@ -12,8 +12,9 @@ using UnityEngine;
 
 namespace RenownedGames.ExLibEditor.Windows
 {
-    public static class EditorWindowExtensions
+    public static class EditorWindowUtility
     {
+        #region [Extension Methods]
         public static void MoveToCenter(this EditorWindow window)
         {
             Rect position = window.position;
@@ -31,5 +32,6 @@ namespace RenownedGames.ExLibEditor.Windows
                 window.position = new Rect(new Vector2(Screen.width, Screen.height), new Vector2(position.width, position.height));
             }
         }
+        #endregion
     }
 }

@@ -11,8 +11,9 @@ using UnityEditor;
 
 namespace RenownedGames.ExLibEditor
 {
-    public static class SerializedObjectExtenstions
+    public static class SerializedObjectUtility
     {
+        #region [Extension Methods]
         /// <summary>
         /// Find member metadata by path.
         /// </summary>
@@ -22,5 +23,6 @@ namespace RenownedGames.ExLibEditor
         {
             return new MemberData(serializedObject, memberPath);
         }
+        #endregion
     }
 }
