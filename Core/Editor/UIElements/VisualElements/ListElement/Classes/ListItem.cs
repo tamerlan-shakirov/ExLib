@@ -41,7 +41,10 @@ namespace RenownedGames.ExLibEditor.UIElements
         /// <param name="onClick">Called when item is clicked.</param>
         public ListItem(string name, string category, Action onClick) : this(name, onClick)
         {
-            this.category = category.Trim();
+            if (!string.IsNullOrEmpty(category))
+            {
+                this.category = category.Trim();
+            }
         }
 
         /// <summary>
@@ -53,7 +56,10 @@ namespace RenownedGames.ExLibEditor.UIElements
         /// <param name="onClick">Called when item is clicked.</param>
         public ListItem(string name, string category, string tooltip, Action onClick) : this(name, category, onClick)
         {
-            this.tooltip = tooltip.Trim();
+            if (!string.IsNullOrEmpty(tooltip))
+            {
+                this.tooltip = tooltip.Trim();
+            }
         }
 
         /// <summary>
