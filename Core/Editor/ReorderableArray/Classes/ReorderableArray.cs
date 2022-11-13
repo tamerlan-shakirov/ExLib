@@ -44,7 +44,8 @@ namespace RenownedGames.ExLibEditor
 
             onHeaderGUICallback = (position) =>
             {
-                GUI.Label(position, this.serializedProperty.displayName);
+                position.x += 10;
+                GUI.Label(position, this.serializedProperty.displayName, ExEditorStyles.LabelBold);
             };
 
             onElementGUICallback = (position, index, isActive, isFocused) =>
@@ -63,7 +64,8 @@ namespace RenownedGames.ExLibEditor
 
             onNoneElementGUICallback = (position) =>
             {
-                GUI.Label(position, $"Add {this.serializedProperty.displayName}...");
+                position.x += 5;
+                GUI.Label(position, $"Add {this.serializedProperty.displayName}...", ExEditorStyles.Label);
             };
 
             onAddClickCallback = (position) =>
@@ -91,9 +93,9 @@ namespace RenownedGames.ExLibEditor
                     onElementGUICallback.Invoke(elementPosition, index, isActive, isFocused);
 
                     Rect buttonPosition = new Rect(elementPosition.xMax + 2, position.y, buttonWidth, position.height + 1);
-                    if (GUI.Button(buttonPosition, removeButtonContent, EditorStyles.ArrayCenteredButton))
+                    if (GUI.Button(buttonPosition, removeButtonContent, ExEditorStyles.ArrayCenteredButton))
                     {
-                        this.serializedProperty.DeleteArrayElementAtIndex(index);
+                        onRemoveClickCallback.Invoke(buttonPosition, index);
                         this.serializedObject.ApplyModifiedProperties();
                         GUIUtility.ExitGUI();
                     }
@@ -106,11 +108,11 @@ namespace RenownedGames.ExLibEditor
                     {
                         if ((index + 1) % 2 == 0)
                         {
-                            EditorStyles.ArrayEntryEven.Draw(position, false, isActive, isActive, isFocused);
+                            ExEditorStyles.ArrayEntryEven.Draw(position, false, isActive, isActive, isFocused);
                         }
                         else
                         {
-                            EditorStyles.ArrayEntryOdd.Draw(position, false, isActive, isActive, isFocused);
+                            ExEditorStyles.ArrayEntryOdd.Draw(position, false, isActive, isActive, isFocused);
                         }
                     }
                 }
@@ -125,13 +127,14 @@ namespace RenownedGames.ExLibEditor
         public void Draw(Rect position)
         {
             Rect headerPosition = new Rect(position.x, position.y, position.width - buttonWidth, headerHeight);
-            if (GUI.Button(headerPosition, new GUIContent("Events"), EditorStyles.ArrayButton))
+            if (GUI.Button(headerPosition, GUIContent.none, ExEditorStyles.ArrayButton))
             {
                 serializedProperty.isExpanded = !serializedProperty.isExpanded;
             }
+            onHeaderGUICallback.Invoke(headerPosition);
 
             Rect plusPosition = new Rect(headerPosition.xMax - 1, position.y, buttonWidth, headerHeight);
-            if (GUI.Button(plusPosition, addButtonContent, EditorStyles.ArrayCenteredButton))
+            if (GUI.Button(plusPosition, addButtonContent, ExEditorStyles.ArrayCenteredButton))
             {
                 onAddClickCallback.Invoke(plusPosition);
             }
@@ -139,7 +142,7 @@ namespace RenownedGames.ExLibEditor
             if (serializedProperty.isExpanded)
             {
                 Rect backgroundPosition = new Rect(position.x, headerPosition.yMax - 1, position.width - 1, position.height - headerPosition.height);
-                GUI.Box(backgroundPosition, GUIContent.none, EditorStyles.ArrayEntryBkg);
+                GUI.Box(backgroundPosition, GUIContent.none, ExEditorStyles.ArrayEntryBkg);
 
                 Rect listPosition = new Rect(backgroundPosition.x, backgroundPosition.y - 3f, backgroundPosition.width, backgroundPosition.height);
                 reorderableList.DoList(listPosition);
