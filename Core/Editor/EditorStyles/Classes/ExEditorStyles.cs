@@ -12,8 +12,50 @@ using UnityEngine;
 
 namespace RenownedGames.ExLibEditor
 {
-    public static class EditorStyles
+    public static class ExEditorStyles
     {
+        private static GUIStyle _ArrayLabel;
+        public static GUIStyle Label
+        {
+            get
+            {
+                if (_ArrayLabel == null)
+                {
+                    _ArrayLabel = new GUIStyle();
+
+                    _ArrayLabel.fontSize = 12;
+                    _ArrayLabel.fontStyle = FontStyle.Normal;
+                    _ArrayLabel.alignment = TextAnchor.MiddleLeft;
+
+                    Color32 textColor = EditorGUIUtility.isProSkin ? new Color32(200, 200, 200, 255) : new Color32(3, 3, 3, 255);
+
+                    _ArrayLabel.normal.textColor = textColor;
+                    _ArrayLabel.onNormal.textColor = textColor;
+                    _ArrayLabel.active.textColor = textColor;
+                    _ArrayLabel.onActive.textColor = textColor;
+                    _ArrayLabel.focused.textColor = textColor;
+                    _ArrayLabel.onFocused.textColor = textColor;
+                    _ArrayLabel.hover.textColor = textColor;
+                    _ArrayLabel.onHover.textColor = textColor;
+                }
+                return _ArrayLabel;
+            }
+        }
+
+        private static GUIStyle _ArrayLabelBold;
+        public static GUIStyle LabelBold
+        {
+            get
+            {
+                if (_ArrayLabelBold == null)
+                {
+                    _ArrayLabelBold = new GUIStyle(Label);
+                    _ArrayLabelBold.fontStyle = FontStyle.Bold;
+                }
+                return _ArrayLabelBold;
+            }
+        }
+
         private static GUIStyle _ArrayHeader;
         public static GUIStyle ArrayHeader
         {
