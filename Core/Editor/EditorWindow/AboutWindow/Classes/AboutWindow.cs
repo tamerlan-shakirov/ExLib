@@ -70,7 +70,7 @@ namespace RenownedGames.ExLibEditor.Windows
                 get
                 {
                     GUIStyle style = new GUIStyle(GUI.skin.label);
-                    style.alignment = TextAnchor.MiddleLeft;
+                    style.alignment = TextAnchor.UpperLeft;
                     style.fontSize = 11;
                     style.richText = true;
                     style.fontStyle = FontStyle.Bold;
@@ -126,11 +126,13 @@ namespace RenownedGames.ExLibEditor.Windows
                 Developer developer = developers[i];
 
                 GUIContent content = new GUIContent(developer.position);
-                float width = Styles.Label.CalcSize(content).x;
+                Vector2 posSize = Styles.Label.CalcSize(content);
+                float width = posSize.x;
                 content.text = developer.name;
-                width += Styles.Label.CalcSize(content).x;
+                Vector2 nameSize = Styles.Label.CalcSize(content);
+                width += nameSize.x;
                 textHalfWidth = Mathf.Max(textHalfWidth, width);
-                textHalfHeight += 17;
+                textHalfHeight += Mathf.Max(posSize.y, nameSize.y) + 2;
             }
             textHalfWidth /= 2;
             textHalfHeight /= 2;
@@ -170,11 +172,13 @@ namespace RenownedGames.ExLibEditor.Windows
                 Rect devPosition = new Rect(devsPosition.x, devsPosition.y + 3, position.width, devsPosition.height);
 
                 GUIContent posContent = new GUIContent(developer.position);
-                Rect posPosition = new Rect(devPosition.x, devPosition.y, Styles.Label.CalcSize(posContent).x, devPosition.height);
+                Vector2 posSize = Styles.Label.CalcSize(posContent);
+                Rect posPosition = new Rect(devPosition.x, devPosition.y, posSize.x, posSize.y);
                 GUI.Label(posPosition, posContent, Styles.Label);
 
                 GUIContent nameContent = new GUIContent(developer.name);
-                Rect namePosition = new Rect(posPosition.xMax, posPosition.y, Styles.Label.CalcSize(nameContent).x, devPosition.height);
+                Vector2 nameSize = Styles.Label.CalcSize(nameContent);
+                Rect namePosition = new Rect(posPosition.xMax, posPosition.y, nameSize.x, nameSize.y);
                 GUI.Label(namePosition, nameContent, Styles.Label);
 
                 devsPosition.y = devPosition.yMax;
