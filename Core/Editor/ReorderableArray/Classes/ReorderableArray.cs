@@ -23,7 +23,6 @@ namespace RenownedGames.ExLibEditor
         public OnRemoveClickDelegate onRemoveClickCallback;
 
         // Stored required properties.
-        private SerializedObject serializedObject;
         private SerializedProperty serializedProperty;
         private ReorderableList reorderableList;
         private GUIContent addButtonContent;
@@ -33,7 +32,6 @@ namespace RenownedGames.ExLibEditor
 
         public ReorderableArray(SerializedObject serializedObject, SerializedProperty serializedProperty)
         {
-            this.serializedObject = serializedObject;
             this.serializedProperty = serializedProperty;
 
             headerHeight = 22;
@@ -52,13 +50,13 @@ namespace RenownedGames.ExLibEditor
             {
                 position.y += 3;
                 position.height -= 1;
-                SerializedProperty element = this.serializedProperty.GetArrayElementAtIndex(index);
+                SerializedProperty element = serializedProperty.GetArrayElementAtIndex(index);
                 EditorGUI.PropertyField(position, element, true);
             };
 
             getElementHeightCallback = (index) =>
             {
-                SerializedProperty element = this.serializedProperty.GetArrayElementAtIndex(index);
+                SerializedProperty element = serializedProperty.GetArrayElementAtIndex(index);
                 return EditorGUI.GetPropertyHeight(element, true) + EditorGUIUtility.standardVerticalSpacing;
             };
 
@@ -88,7 +86,8 @@ namespace RenownedGames.ExLibEditor
 
                 drawElementCallback = (position, index, isActive, isFocused) =>
                 {
-                    position.width += 4;
+                    position.x -= 3;
+                    position.width += 7;
                     Rect elementPosition = new Rect(position.x, position.y, position.width - buttonWidth, position.height);
                     onElementGUICallback.Invoke(elementPosition, index, isActive, isFocused);
 
@@ -96,7 +95,7 @@ namespace RenownedGames.ExLibEditor
                     if (GUI.Button(buttonPosition, removeButtonContent, ExEditorStyles.ArrayCenteredButton))
                     {
                         onRemoveClickCallback.Invoke(buttonPosition, index);
-                        this.serializedObject.ApplyModifiedProperties();
+                        serializedObject.ApplyModifiedProperties();
                         GUIUtility.ExitGUI();
                     }
                 },
