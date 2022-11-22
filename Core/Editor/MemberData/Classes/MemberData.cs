@@ -45,14 +45,17 @@ namespace RenownedGames.ExLibEditor
                         IEnumerable enumerable = fieldInfo.GetValue(declaringObject) as IEnumerable;
                         foreach (object element in enumerable)
                         {
-                            if (index == count)
+                            if(element != null)
                             {
-                                type = element.GetType();
-                                declaringObject = element;
-                                if (paths.Count > 0)
+                                if (index == count)
                                 {
-                                    Search();
-                                    break;
+                                    type = element.GetType();
+                                    declaringObject = element;
+                                    if (paths.Count > 0)
+                                    {
+                                        Search();
+                                        break;
+                                    }
                                 }
                             }
                             count++;
@@ -79,8 +82,10 @@ namespace RenownedGames.ExLibEditor
                     if (memberInfo is FieldInfo fieldInfo)
                     {
                         type = fieldInfo.FieldType;
-                        if (!type.IsArray && paths.Count > 0)
+                        Type ienum = type.GetInterface("IEnumerable`1");
+                        if (ienum == null && paths.Count > 0)
                         {
+                            UnityEngine.Debug.Log($"Member: {memberName}, Type: {type.Name}");
                             declaringObject = fieldInfo.GetValue(declaringObject);
                         }
                     }
