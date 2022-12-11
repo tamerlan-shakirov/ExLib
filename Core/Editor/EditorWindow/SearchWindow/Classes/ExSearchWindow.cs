@@ -70,7 +70,7 @@ namespace RenownedGames.ExLibEditor.Windows
 
                 entry.content.text = paths[length];
                 SearchTreeEntry searchTreeEntry = new SearchTreeEntry(entry.content);
-                searchTreeEntry.userData = entry.data;
+                searchTreeEntry.userData = i;
                 searchTreeEntry.level = paths.Length;
                 treeEntries.Add(searchTreeEntry);
             }
@@ -84,14 +84,11 @@ namespace RenownedGames.ExLibEditor.Windows
         /// <param name="context">Contextual data to pass to the search window when it is first created.</param>
         public bool OnSelectEntry(SearchTreeEntry searchTreeEntry, SearchWindowContext context)
         {
-            for (int i = 0; i < entries.Count; i++)
+            Entry entry = entries[(int)searchTreeEntry.userData];
+            if(entry.onSelect != null)
             {
-                Entry entry = entries[i];
-                if (entry.content.text == searchTreeEntry.content.text)
-                {
-                    entry.onSelect?.Invoke(entry.data);
-                    return true;
-                }
+                entry.onSelect.Invoke(entry.data);
+                return true;
             }
             return false;
         }
