@@ -12,6 +12,7 @@ using UnityEngine;
 
 namespace RenownedGames.ExLibEditor
 {
+    [System.Obsolete("Use UnityEditor.ScriptableSingleton<T> instead.")]
     public class SettingsSingleton<T> : ScriptableObject where T : ScriptableObject
     {
         /// <summary>

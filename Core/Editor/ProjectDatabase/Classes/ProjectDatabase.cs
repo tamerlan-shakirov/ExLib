@@ -17,13 +17,28 @@ namespace RenownedGames.ExLibEditor
     public static class ProjectDatabase
     {
         /// <summary>
-        /// Load all assets of type T.
+        /// Load all assets type of T.
         /// </summary>
+        /// <typeparam name="T">Type of UnityEngine.Object</typeparam>
         public static T[] LoadAll<T>() where T : Object
         {
-            List<T> assets = new List<T>();
+            return LoadAll<T>("*");
+        }
 
-            string[] paths = Directory.GetFiles(Application.dataPath, "*", SearchOption.AllDirectories);
+        /// <summary>
+        /// Load all assets type of T.
+        /// </summary>
+        /// <typeparam name="T">Type of UnityEngine.Object</typeparam>
+        /// <param name="searchPattern">
+        /// The search string to match against the names of files in path. 
+        /// This parameter can contain a combination of valid literal path and wildcard (* and ?) characters, 
+        /// but it doesn't support regular expressions.
+        /// </param>
+        /// <returns>Array of all loaded asset type of (T)</returns>
+        public static T[] LoadAll<T>(string searchPattern) where T : Object
+        {
+            List<T> assets = new List<T>();
+            string[] paths = Directory.GetFiles(Application.dataPath, searchPattern, SearchOption.AllDirectories);
             for (int i = 0; i < paths.Length; i++)
             {
                 string path = paths[i];
@@ -37,13 +52,22 @@ namespace RenownedGames.ExLibEditor
         }
 
         /// <summary>
-        /// Enumerate all assets of type T.
+        /// Go through all assets type of T in project.
         /// </summary>
-        public static IEnumerable<T> EnumerateAssets<T>() where T : Object
+        /// <typeparam name="T">Type of UnityEngine.Object</typeparam>
+        /// <param name="searchPattern">
+        /// The search string to match against the names of files in path. 
+        /// This parameter can contain a combination of valid literal path and wildcard (* and ?) characters, 
+        /// but it doesn't support regular expressions.
+        /// </param>
+        /// <returns></returns>
+        public static IEnumerable<T> EnumerateAssets<T>(string searchPattern) where T : Object
         {
-            foreach(string path in Directory.EnumerateFiles(Application.dataPath, "*", SearchOption.AllDirectories))
+            IEnumerable<string> paths = Directory.EnumerateFiles(Application.dataPath, searchPattern, SearchOption.AllDirectories);
+            foreach (string path in paths)
             {
-                T asset = AssetDatabase.LoadAssetAtPath<T>(GetRelativePath(path));
+                string relativePath = GetRelativePath(path);
+                T asset = AssetDatabase.LoadAssetAtPath<T>(relativePath);
                 if (asset != null)
                 {
                     yield return asset;
@@ -52,7 +76,15 @@ namespace RenownedGames.ExLibEditor
         }
 
         /// <summary>
-        /// Get relative path from absolute path.
+        /// Go through all assets type of (T).
+        /// </summary>
+        public static IEnumerable<T> EnumerateAssets<T>() where T : Object
+        {
+            return EnumerateAssets<T>("*");
+        }
+
+        /// <summary>
+        /// Get relative path to project /Assets folder.
         /// </summary>
         /// <param name="path">Absolute path to asset.</param>
         public static string GetRelativePath(string path)
