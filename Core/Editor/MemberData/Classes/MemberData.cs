@@ -42,20 +42,25 @@ namespace RenownedGames.ExLibEditor
                     int count = 0;
                     if (memberInfo is FieldInfo fieldInfo)
                     {
-                        IEnumerable enumerable = fieldInfo.GetValue(declaringObject) as IEnumerable;
+                        object mainObject = fieldInfo.GetValue(declaringObject);
+                        IEnumerable enumerable = mainObject as IEnumerable;
                         foreach (object element in enumerable)
                         {
-                            if(element != null)
+                            if (index == count)
                             {
-                                if (index == count)
+                                if (element != null)
                                 {
                                     type = element.GetType();
-                                    declaringObject = element;
-                                    if (paths.Count > 0)
-                                    {
-                                        Search();
-                                        break;
-                                    }
+                                }
+                                else
+                                {
+                                    type = mainObject.GetType().GetElementType();
+                                }
+                                declaringObject = element;
+                                if (paths.Count > 0)
+                                {
+                                    Search();
+                                    break;
                                 }
                             }
                             count++;
@@ -82,11 +87,10 @@ namespace RenownedGames.ExLibEditor
                     if (memberInfo is FieldInfo fieldInfo)
                     {
                         type = fieldInfo.FieldType;
-                        Type ienum = type.GetInterface("IEnumerable`1");
-                        if (ienum == null && paths.Count > 0)
+                        if (paths.Count > 0 && ((!type.IsGenericType && !type.IsArray) || (type.IsGenericType && type.GetInterface("IEnumerable`1") == null)))
                         {
-                            UnityEngine.Debug.Log($"Member: {memberName}, Type: {type.Name}");
                             declaringObject = fieldInfo.GetValue(declaringObject);
+                            type = declaringObject.GetType();
                         }
                     }
                     else if (memberInfo is MethodInfo methodInfo)
