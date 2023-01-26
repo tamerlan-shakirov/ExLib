@@ -31,81 +31,7 @@ namespace RenownedGames.ExLibEditor
             string[] pathSplit = memberPath.Split('.');
             Queue<string> paths = new Queue<string>(pathSplit);
 
-            void Search()
-            {
-                string memberName = paths.Dequeue();
-                if (memberName.Contains("data["))
-                {
-                    string result = Regex.Match(memberName, @"\d+").Value;
-                    int index = Convert.ToInt32(result);
-
-                    int count = 0;
-                    if (memberInfo is FieldInfo fieldInfo)
-                    {
-                        object mainObject = fieldInfo.GetValue(declaringObject);
-                        IEnumerable enumerable = mainObject as IEnumerable;
-                        foreach (object element in enumerable)
-                        {
-                            if (index == count)
-                            {
-                                if (element != null)
-                                {
-                                    type = element.GetType();
-                                }
-                                else
-                                {
-                                    type = mainObject.GetType().GetElementType();
-                                }
-                                declaringObject = element;
-                                if (paths.Count > 0)
-                                {
-                                    Search();
-                                    break;
-                                }
-                            }
-                            count++;
-                        }
-                    }
-
-                }
-
-
-                MemberInfo member = null;
-                foreach (MemberInfo item in type.AllMembers())
-                {
-                    if (item.Name == memberName)
-                    {
-                        member = item;
-                        break;
-                    }
-                }
-
-                if (member != null)
-                {
-                    memberInfo = member;
-
-                    if (memberInfo is FieldInfo fieldInfo)
-                    {
-                        type = fieldInfo.FieldType;
-                        if (paths.Count > 0 && ((!type.IsGenericType && !type.IsArray) || (type.IsGenericType && type.GetInterface("IEnumerable`1") == null)))
-                        {
-                            declaringObject = fieldInfo.GetValue(declaringObject);
-                            type = declaringObject.GetType();
-                        }
-                    }
-                    else if (memberInfo is MethodInfo methodInfo)
-                    {
-                        type = methodInfo.ReturnType;
-                    }
-                }
-
-                if (paths.Count > 0)
-                {
-                    Search();
-                }
-            }
-
-            Search();
+            RecursiveSearch(ref paths);
         }
 
         /// <summary>
@@ -136,5 +62,85 @@ namespace RenownedGames.ExLibEditor
         {
             return $"Name: [{memberInfo.Name}], Declaring Object: [{declaringObject}], Type: [{type}]";
         }
+
+        private void RecursiveSearch(ref Queue<string> paths)
+        {
+            string memberName = paths.Dequeue();
+            if (memberName.Contains("data["))
+            {
+                string result = Regex.Match(memberName, @"\d+").Value;
+                int index = Convert.ToInt32(result);
+
+                int count = 0;
+                if (memberInfo is FieldInfo fieldInfo)
+                {
+                    object mainObject = fieldInfo.GetValue(declaringObject);
+                    IEnumerable enumerable = mainObject as IEnumerable;
+                    foreach (object element in enumerable)
+                    {
+                        if (index == count)
+                        {
+                            if (element != null)
+                            {
+                                type = element.GetType();
+                            }
+                            else if (mainObject.GetType().IsGenericType)
+                            {
+                                type = mainObject.GetType().GetGenericArguments()[0];
+                            }
+                            else
+                            {
+                                type = mainObject.GetType().GetElementType();
+                            }
+
+                            declaringObject = element;
+                            if (paths.Count > 0)
+                            {
+                                RecursiveSearch(ref paths);
+                                break;
+                            }
+                        }
+                        count++;
+                    }
+                }
+
+            }
+
+
+            MemberInfo member = null;
+            foreach (MemberInfo item in type.AllMembers())
+            {
+                if (item.Name == memberName)
+                {
+                    member = item;
+                    break;
+                }
+            }
+
+            if (member != null)
+            {
+                memberInfo = member;
+
+                if (memberInfo is FieldInfo fieldInfo)
+                {
+                    type = fieldInfo.FieldType;
+                    if (paths.Count > 0 && ((!type.IsGenericType && !type.IsArray) || (type.IsGenericType && type.GetInterface("IEnumerable`1") == null)))
+                    {
+                        declaringObject = fieldInfo.GetValue(declaringObject);
+                        type = declaringObject.GetType();
+                    }
+                }
+                else if (memberInfo is MethodInfo methodInfo)
+                {
+                    type = methodInfo.ReturnType;
+                }
+            }
+
+            if (paths.Count > 0)
+            {
+                RecursiveSearch(ref paths);
+            }
+        }
+
     }
 }
