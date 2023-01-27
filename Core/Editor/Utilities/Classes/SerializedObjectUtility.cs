@@ -19,6 +19,7 @@ namespace RenownedGames.ExLibEditor
         /// </summary>
         /// <param name="memberPath">Path to member.</param>
         /// <returns>SerializedMemberData of member.</returns>
+        [System.Obsolete]
         public static MemberData FindMember(this SerializedObject serializedObject, string memberPath)
         {
             return new MemberData(serializedObject, memberPath);

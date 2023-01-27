@@ -17,6 +17,7 @@ using UnityEditor;
 
 namespace RenownedGames.ExLibEditor
 {
+    [Obsolete]
     public sealed class MemberData
     {
         private object declaringObject;
