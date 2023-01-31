@@ -4,7 +4,7 @@
    Company   :   Renowned Games
    Developer :   Tamerlan Shakirov
    ----------------------------------------------------------------
-   Copyright 2022 Tamerlan Shakirov All rights reserved.
+   Copyright 2022-2023 Renowned Games All rights reserved.
    ================================================================ */
 
 using UnityEditor;
@@ -204,7 +204,8 @@ namespace RenownedGames.ExLibEditor.Windows
 
             if (!string.IsNullOrEmpty(copyright))
             {
-                Rect copyrightPosition = new Rect(position.width - 270, footerPosition.yMin - 16, 280, 14);
+                float width = Styles.Copyright.CalcSize(new GUIContent(copyright)).x;
+                Rect copyrightPosition = new Rect(position.width - (width + 2), footerPosition.yMin - 16, width, 14);
                 GUI.Label(copyrightPosition, copyright, Styles.Copyright);
             }
         }
