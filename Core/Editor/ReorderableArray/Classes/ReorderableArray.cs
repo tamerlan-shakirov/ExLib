@@ -203,7 +203,6 @@ namespace RenownedGames.ExLibEditor
         /// <param name="position">Button rectangle position.</param>
         /// <param name="index">Remove element index.</param>
         public delegate void OnRemoveClickDelegate(Rect position, int index);
-
         #endregion
 
         #region [Getter / Setter]

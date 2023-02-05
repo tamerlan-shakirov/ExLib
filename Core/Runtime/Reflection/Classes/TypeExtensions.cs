@@ -117,5 +117,15 @@ namespace RenownedGames.ExLib.Reflection
             }
             while (type != null);
         }
+
+        /// <summary>
+        /// Check if a type provides default constructor?
+        /// </summary>
+        /// <param name="t"></param>
+        /// <returns></returns>
+        public static bool HasDefaultConstructor(this Type type)
+        {
+            return type.IsValueType || type.GetConstructor(Type.EmptyTypes) != null;
+        }
     }
 }
