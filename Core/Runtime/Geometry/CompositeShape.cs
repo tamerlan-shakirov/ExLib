@@ -1,22 +1,25 @@
-﻿using System.Collections.Generic;
+﻿/* ================================================================
+   ----------------------------------------------------------------
+   Project   :   Aurora FPS Engine
+   Publisher :   Renowned Games
+   Developer :   Zinnur Davleev
+   ----------------------------------------------------------------
+   Copyright 2022-2023 Renowned Games All rights reserved.
+   ================================================================ */
+
+using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-
-/*
- * Processes array of shapes into a single mesh
- * Automatically determines which shapes are solid, and which are holes
- * Ignores invalid shapes (contain self-intersections, too few points, overlapping holes)
- */
 
 namespace RenownedGames.ExLib
 {
     public partial class CompositeShape
     {
-        public Vector3[] vertices;
-        public int[] triangles;
+        private Vector3[] vertices;
+        private int[] triangles;
 
-        Shape[] shapes;
-        float height = 0;
+        private Shape[] shapes;
+        private float height = 0;
 
         public CompositeShape(IEnumerable<Shape> shapes)
         {
@@ -50,32 +53,32 @@ namespace RenownedGames.ExLib
 
                     if (eligibleShapes[i].IsParentOf(eligibleShapes[j]))
                     {
-                        eligibleShapes[j].parents.Add(eligibleShapes[i]);
+                        eligibleShapes[j].GetParents().Add(eligibleShapes[i]);
                     }
                 }
             }
 
             // Holes are shapes with an odd number of parents.
-            CompositeShapeData[] holeShapes = eligibleShapes.Where(x => x.parents.Count % 2 != 0).ToArray();
+            CompositeShapeData[] holeShapes = eligibleShapes.Where(x => x.GetParents().Count % 2 != 0).ToArray();
             foreach (CompositeShapeData holeShape in holeShapes)
             {
                 // The most immediate parent (i.e the smallest parent shape) will be the one that has the highest number of parents of its own. 
-                CompositeShapeData immediateParent = holeShape.parents.OrderByDescending(x => x.parents.Count).First();
-                immediateParent.holes.Add(holeShape);
+                CompositeShapeData immediateParent = holeShape.GetParents().OrderByDescending(x => x.GetParents().Count).First();
+                immediateParent.GetHoles().Add(holeShape);
             }
 
             // Solid shapes have an even number of parents
-            CompositeShapeData[] solidShapes = eligibleShapes.Where(x => x.parents.Count % 2 == 0).ToArray();
+            CompositeShapeData[] solidShapes = eligibleShapes.Where(x => x.GetParents().Count % 2 == 0).ToArray();
             foreach (CompositeShapeData solidShape in solidShapes)
             {
                 solidShape.ValidateHoles();
 
             }
             // Create polygons from the solid shapes and their associated hole shapes
-            Polygon[] polygons = solidShapes.Select(x => new Polygon(x.polygon.points, x.holes.Select(h => h.polygon.points).ToArray())).ToArray();
+            Polygon[] polygons = solidShapes.Select(x => new Polygon(x.GetPolygon().GetPoints(), x.GetHoles().Select(h => h.GetPolygon().GetPoints()).ToArray())).ToArray();
   
             // Flatten the points arrays from all polygons into a single array, and convert the vector2s to vector3s.
-            vertices = polygons.SelectMany(x => x.points.Select(v2 => new Vector3(v2.x, height, v2.y))).ToArray();
+            vertices = polygons.SelectMany(x => x.GetPoints().Select(v2 => new Vector3(v2.x, height, v2.y))).ToArray();
 
             // Triangulate each polygon and flatten the triangle arrays into a single array.
             List<int> allTriangles = new List<int>();
@@ -89,7 +92,7 @@ namespace RenownedGames.ExLib
                 {
                     allTriangles.Add(polygonTriangles[j] + startVertexIndex);
                 }
-                startVertexIndex += polygons[i].numPoints;
+                startVertexIndex += polygons[i].GetPointsCount();
             }
 
             triangles = allTriangles.ToArray();

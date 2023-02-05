@@ -1,24 +1,27 @@
-﻿using UnityEngine;
+﻿/* ================================================================
+   ----------------------------------------------------------------
+   Project   :   Aurora FPS Engine
+   Publisher :   Renowned Games
+   Developer :   Zinnur Davleev
+   ----------------------------------------------------------------
+   Copyright 2022-2023 Renowned Games All rights reserved.
+   ================================================================ */
 
-/*
- * Processes given arrays of hull and hole points into single array, enforcing correct -wiseness.
- * Also provides convenience methods for accessing different hull/hole points
- */
+using UnityEngine;
 
 namespace RenownedGames.ExLib
 {
     public class Polygon
     {
+        private readonly Vector2[] points;
+        private readonly int numPoints;
 
-        public readonly Vector2[] points;
-        public readonly int numPoints;
+        private readonly int numHullPoints;
 
-        public readonly int numHullPoints;
+        private readonly int[] numPointsPerHole;
+        private readonly int numHoles;
 
-        public readonly int[] numPointsPerHole;
-        public readonly int numHoles;
-
-        readonly int[] holeStartIndices;
+        private readonly int[] holeStartIndices;
 
         public Polygon(Vector2[] hull, Vector2[][] holes)
         {
@@ -60,11 +63,9 @@ namespace RenownedGames.ExLib
 
         }
 
-        public Polygon(Vector2[] hull) : this(hull, new Vector2[0][])
-        {
-        }
+        public Polygon(Vector2[] hull) : this(hull, new Vector2[0][]) { }
 
-        bool PointsAreCounterClockwise(Vector2[] testPoints)
+        private bool PointsAreCounterClockwise(Vector2[] testPoints)
         {
             float signedArea = 0;
             for (int i = 0; i < testPoints.Length; i++)
@@ -91,6 +92,32 @@ namespace RenownedGames.ExLib
             return points[holeStartIndices[holeIndex] + index];
         }
 
+        #region [Getter / Setter]
+        public Vector2[] GetPoints()
+        {
+            return points;
+        }
+
+        public int GetPointsCount()
+        {
+            return numPoints;
+        }
+
+        public int GetHullPointsCount()
+        {
+            return numHoles;
+        }
+
+        public int[] GetPointsPerHoleCount()
+        {
+            return numPointsPerHole;
+        }
+
+        public int GetHolesCount()
+        {
+            return numHoles;
+        }
+        #endregion
     }
 
 }

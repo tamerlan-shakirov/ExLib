@@ -1,24 +1,55 @@
-﻿using System.Collections.Generic;
+﻿/* ================================================================
+   ----------------------------------------------------------------
+   Project   :   Aurora FPS Engine
+   Publisher :   Renowned Games
+   Developer :   Zinnur Davleev
+   ----------------------------------------------------------------
+   Copyright 2022-2023 Renowned Games All rights reserved.
+   ================================================================ */
+
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace RenownedGames.ExLib
 {
-	/*
-     * Handles triangulation of given polygon using the 'ear-clipping' algorithm.
-     * The implementation is based on the following paper:
-     * https://www.geometrictools.com/Documentation/TriangulationByEarClipping.pdf
-     */
-
-	public class Triangulator
+    public class Triangulator
     {
-        LinkedList<Vertex> vertsInClippedPolygon;
-        int[] tris;
-        int triIndex;
+        public struct HoleData
+        {
+            public readonly int holeIndex;
+            public readonly int bridgeIndex;
+            public readonly Vector2 bridgePoint;
+
+            public HoleData(int holeIndex, int bridgeIndex, Vector2 bridgePoint)
+            {
+                this.holeIndex = holeIndex;
+                this.bridgeIndex = bridgeIndex;
+                this.bridgePoint = bridgePoint;
+            }
+        }
+
+        public class Vertex
+        {
+            public readonly Vector2 position;
+            public readonly int index;
+            public bool isConvex;
+
+            public Vertex(Vector2 position, int index, bool isConvex)
+            {
+                this.position = position;
+                this.index = index;
+                this.isConvex = isConvex;
+            }
+        }
+
+        private LinkedList<Vertex> vertsInClippedPolygon;
+        private int[] tris;
+        private int triIndex;
 
         public Triangulator(Polygon polygon)
         {
-            int numHoleToHullConnectionVerts = 2 * polygon.numHoles; // 2 verts are added when connecting a hole to the hull.
-            int totalNumVerts = polygon.numPoints + numHoleToHullConnectionVerts;
+            int numHoleToHullConnectionVerts = 2 * polygon.GetHolesCount(); // 2 verts are added when connecting a hole to the hull.
+            int totalNumVerts = polygon.GetPointsCount() + numHoleToHullConnectionVerts;
             tris = new int[(totalNumVerts - 2) * 3];
             vertsInClippedPolygon = GenerateVertexList(polygon);
         }
@@ -76,20 +107,22 @@ namespace RenownedGames.ExLib
             return tris;
         }
 
-        // Creates a linked list of all vertices in the polygon, with the hole vertices joined to the hull at optimal points.
-        LinkedList<Vertex> GenerateVertexList(Polygon polygon)
+        /// <summary>
+        /// Creates a linked list of all vertices in the polygon, with the hole vertices joined to the hull at optimal points.
+        /// </summary>
+        private LinkedList<Vertex> GenerateVertexList(Polygon polygon)
         {
             LinkedList<Vertex> vertexList = new LinkedList<Vertex>();
             LinkedListNode<Vertex> currentNode = null;
 
             // Add all hull points to the linked list
-            for (int i = 0; i < polygon.numHullPoints; i++)
+            for (int i = 0; i < polygon.GetHullPointsCount(); i++)
             {
-                int prevPointIndex = (i - 1 + polygon.numHullPoints) % polygon.numHullPoints;
-                int nextPointIndex = (i + 1) % polygon.numHullPoints;
+                int prevPointIndex = (i - 1 + polygon.GetHullPointsCount()) % polygon.GetHullPointsCount();
+                int nextPointIndex = (i + 1) % polygon.GetHullPointsCount();
 
-                bool vertexIsConvex = IsConvex(polygon.points[prevPointIndex], polygon.points[i], polygon.points[nextPointIndex]);
-                Vertex currentHullVertex = new Vertex(polygon.points[i], i, vertexIsConvex);
+                bool vertexIsConvex = IsConvex(polygon.GetPoints()[prevPointIndex], polygon.GetPoints()[i], polygon.GetPoints()[nextPointIndex]);
+                Vertex currentHullVertex = new Vertex(polygon.GetPoints()[i], i, vertexIsConvex);
 
                 if (currentNode == null)
                     currentNode = vertexList.AddFirst(currentHullVertex);
@@ -100,12 +133,12 @@ namespace RenownedGames.ExLib
             // Process holes:
             List<HoleData> sortedHoleData = new List<HoleData>();
 
-            for (int holeIndex = 0; holeIndex < polygon.numHoles; holeIndex++)
+            for (int holeIndex = 0; holeIndex < polygon.GetHolesCount(); holeIndex++)
             {
                 // Find index of rightmost point in hole. This 'bridge' point is where the hole will be connected to the hull.
                 Vector2 holeBridgePoint = new Vector2(float.MinValue, 0);
                 int holeBridgeIndex = 0;
-                for (int i = 0; i < polygon.numPointsPerHole[holeIndex]; i++)
+                for (int i = 0; i < polygon.GetPointsPerHoleCount()[holeIndex]; i++)
                 {
                     if (polygon.GetHolePoint(i, holeIndex).x > holeBridgePoint.x)
                     {
@@ -220,19 +253,19 @@ namespace RenownedGames.ExLib
 
                 // Insert hole points (starting at holeBridgeNode) into vertex list at validBridgeNodeOnHull
                 currentNode = validBridgeNodeOnHull;
-                for (int i = holeData.bridgeIndex; i <= polygon.numPointsPerHole[holeData.holeIndex] + holeData.bridgeIndex; i++)
+                for (int i = holeData.bridgeIndex; i <= polygon.GetPointsPerHoleCount()[holeData.holeIndex] + holeData.bridgeIndex; i++)
                 {
                     int previousIndex = currentNode.Value.index;
-                    int currentIndex = polygon.IndexOfPointInHole(i % polygon.numPointsPerHole[holeData.holeIndex], holeData.holeIndex);
-                    int nextIndex = polygon.IndexOfPointInHole((i + 1) % polygon.numPointsPerHole[holeData.holeIndex], holeData.holeIndex);
+                    int currentIndex = polygon.IndexOfPointInHole(i % polygon.GetPointsPerHoleCount()[holeData.holeIndex], holeData.holeIndex);
+                    int nextIndex = polygon.IndexOfPointInHole((i + 1) % polygon.GetPointsPerHoleCount()[holeData.holeIndex], holeData.holeIndex);
 
-                    if (i == polygon.numPointsPerHole[holeData.holeIndex] + holeData.bridgeIndex) // have come back to starting point
+                    if (i == polygon.GetPointsPerHoleCount()[holeData.holeIndex] + holeData.bridgeIndex) // have come back to starting point
                     {
                         nextIndex = validBridgeNodeOnHull.Value.index; // next point is back to the point on the hull
                     }
 
-                    bool vertexIsConvex = IsConvex(polygon.points[previousIndex], polygon.points[currentIndex], polygon.points[nextIndex]);
-                    Vertex holeVertex = new Vertex(polygon.points[currentIndex], currentIndex, vertexIsConvex);
+                    bool vertexIsConvex = IsConvex(polygon.GetPoints()[previousIndex], polygon.GetPoints()[currentIndex], polygon.GetPoints()[nextIndex]);
+                    Vertex holeVertex = new Vertex(polygon.GetPoints()[currentIndex], currentIndex, vertexIsConvex);
                     currentNode = vertexList.AddAfter(currentNode, holeVertex);
                 }
 
@@ -250,9 +283,10 @@ namespace RenownedGames.ExLib
             return vertexList;
         }
 
-
-        // check if triangle contains any verts (note, only necessary to check reflex verts).
-        bool TriangleContainsVertex(Vertex v0, Vertex v1, Vertex v2)
+        /// <summary>
+        /// Check if triangle contains any verts (note, only necessary to check reflex verts).
+        /// </summary>
+        private bool TriangleContainsVertex(Vertex v0, Vertex v1, Vertex v2)
         {
             LinkedListNode<Vertex> vertexNode = vertsInClippedPolygon.First;
             for (int i = 0; i < vertsInClippedPolygon.Count; i++)
@@ -274,40 +308,12 @@ namespace RenownedGames.ExLib
             return false;
         }
 
-
-        // v1 is considered a convex vertex if v0-v1-v2 are wound in a counter-clockwise order.
-        bool IsConvex(Vector2 v0, Vector2 v1, Vector2 v2)
+        /// <summary>
+        /// v1 is considered a convex vertex if v0-v1-v2 are wound in a counter-clockwise order.
+        /// </summary>
+        private bool IsConvex(Vector2 v0, Vector2 v1, Vector2 v2)
         {
             return Math2D.SideOfLine(v0, v2, v1) == -1;
         }
-
-        public struct HoleData
-        {
-            public readonly int holeIndex;
-            public readonly int bridgeIndex;
-            public readonly Vector2 bridgePoint;
-
-            public HoleData(int holeIndex, int bridgeIndex, Vector2 bridgePoint)
-            {
-                this.holeIndex = holeIndex;
-                this.bridgeIndex = bridgeIndex;
-                this.bridgePoint = bridgePoint;
-            }
-        }
-
-        public class Vertex
-        {
-            public readonly Vector2 position;
-            public readonly int index;
-            public bool isConvex;
-
-            public Vertex(Vector2 position, int index, bool isConvex)
-            {
-                this.position = position;
-                this.index = index;
-                this.isConvex = isConvex;
-            }
-        }
     }
-
 }
