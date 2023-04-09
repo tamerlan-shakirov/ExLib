@@ -1,10 +1,10 @@
 ﻿/* ================================================================
    ----------------------------------------------------------------
-   Project   :   Aurora Engine
+   Project   :   ExLib
    Publisher :   Renowned Games
    Developer :   Tamerlan Shakirov
    ----------------------------------------------------------------
-   Copyright 2022 Renowned Games All rights reserved.
+   Copyright 2022-2023 Renowned Games All rights reserved.
    ================================================================ */
 
 using System;
