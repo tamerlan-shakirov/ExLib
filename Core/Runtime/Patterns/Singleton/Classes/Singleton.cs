@@ -29,18 +29,6 @@ namespace RenownedGames.ExLib.Patterns
         private static bool applicationIsQuitting = false;
 
         /// <summary>
-        /// Called when the script instance is being loaded.
-        /// </summary>
-        protected virtual void Awake()
-        {
-            instance = GetComponent<T>();
-            if(transform == transform.root)
-            {
-                DontDestroyOnLoad(this);
-            }
-        }
-
-        /// <summary>
         /// Runtime instance reference of T.
         /// </summary>
         public static T GetRuntimeInstance()
