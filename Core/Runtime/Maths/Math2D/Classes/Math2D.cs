@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 
-namespace RenownedGames.ExLib
+namespace RenownedGames.ExLib.Maths
 {
     public static class Math2D
     {

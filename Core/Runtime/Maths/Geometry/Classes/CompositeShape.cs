@@ -1,6 +1,6 @@
 ﻿/* ================================================================
    ----------------------------------------------------------------
-   Project   :   Aurora FPS Engine
+   Project   :   ExLib
    Publisher :   Renowned Games
    Developer :   Zinnur Davleev
    ----------------------------------------------------------------
@@ -11,9 +11,9 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-namespace RenownedGames.ExLib
+namespace RenownedGames.ExLib.Maths
 {
-    public partial class CompositeShape
+    public class CompositeShape
     {
         private Vector3[] vertices;
         private int[] triangles;

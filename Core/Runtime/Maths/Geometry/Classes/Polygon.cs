@@ -1,6 +1,6 @@
 ﻿/* ================================================================
    ----------------------------------------------------------------
-   Project   :   Aurora FPS Engine
+   Project   :   ExLib
    Publisher :   Renowned Games
    Developer :   Zinnur Davleev
    ----------------------------------------------------------------
@@ -9,7 +9,7 @@
 
 using UnityEngine;
 
-namespace RenownedGames.ExLib
+namespace RenownedGames.ExLib.Maths
 {
     public class Polygon
     {

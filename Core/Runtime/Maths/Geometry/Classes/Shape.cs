@@ -1,6 +1,6 @@
 /* ================================================================
    ----------------------------------------------------------------
-   Project   :   Aurora FPS Engine
+   Project   :   ExLib
    Publisher :   Renowned Games
    Developer :   Zinnur Davleev
    ----------------------------------------------------------------
@@ -12,7 +12,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace RenownedGames.ExLib
+namespace RenownedGames.ExLib.Maths
 {
     [Serializable]
     public class Shape : IEnumerable, IList<Vector2>

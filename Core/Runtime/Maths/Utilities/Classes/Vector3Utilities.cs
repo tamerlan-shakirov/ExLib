@@ -9,7 +9,7 @@
 
 using UnityEngine;
 
-namespace RenownedGames.ExLib
+namespace RenownedGames.ExLib.Maths
 {
     public static class Vector3Utilities
     {
