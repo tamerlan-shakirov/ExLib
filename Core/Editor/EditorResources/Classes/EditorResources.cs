@@ -14,8 +14,15 @@ using UnityEngine;
 
 namespace RenownedGames.ExLibEditor
 {
+    [InitializeOnLoad]
     public static class EditorResources
     {
+        private static string[] Paths;
+        static EditorResources()
+        {
+            Paths = GetAllPaths();
+        }
+
         /// <summary>
         /// Returns the first asset object of type type at given path assetPath.
         /// </summary>
@@ -24,10 +31,9 @@ namespace RenownedGames.ExLibEditor
         /// <returns>The asset matching the parameters.</returns>
         public static Object Load(string assetPath, System.Type type)
         {
-            string[] paths = GetAllPaths();
-            for (int i = 0; i < paths.Length; i++)
+            for (int i = 0; i < Paths.Length; i++)
             {
-                string path = paths[i];
+                string path = Paths[i];
                 path = Path.Combine(path, assetPath);
                 if (Directory.Exists(Path.GetDirectoryName(path)))
                 {
@@ -48,10 +54,9 @@ namespace RenownedGames.ExLibEditor
         /// <returns>The asset matching the parameters.</returns>
         public static T Load<T>(string assetPath) where T : Object
         {
-            string[] paths = GetAllPaths();
-            for (int i = 0; i < paths.Length; i++)
+            for (int i = 0; i < Paths.Length; i++)
             {
-                string path = paths[i];
+                string path = Paths[i];
                 path = Path.Combine(path, assetPath);
                 if (Directory.Exists(Path.GetDirectoryName(path)))
                 {
@@ -73,10 +78,9 @@ namespace RenownedGames.ExLibEditor
         public static T[] LoadAll<T>(string assetsPath, SearchOption searchOption) where T : Object
         {
             List<T> assets = new List<T>();
-            string[] paths = GetAllPaths();
-            for (int i = 0; i < paths.Length; i++)
+            for (int i = 0; i < Paths.Length; i++)
             {
-                string path = paths[i];
+                string path = Paths[i];
                 path = Path.Combine(path, assetsPath);
                 if (Directory.Exists(path))
                 {
