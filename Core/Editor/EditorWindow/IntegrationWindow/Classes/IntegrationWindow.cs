@@ -16,7 +16,7 @@ using Object = UnityEngine.Object;
 
 namespace RenownedGames.ExLibEditor
 {
-    public abstract class IntegrationWindow : EditorWindow
+    public abstract class IntegrationWindow : EditorWindow, IHasCustomMenu
     {
         /// <summary>
         /// Common GUIStyles used for Integration provider GUI.
@@ -30,6 +30,7 @@ namespace RenownedGames.ExLibEditor
             private GUIStyle entryStyle;
             private GUIStyle buttonStyle;
             private GUIStyle titleStyle;
+            private GUIContent helpIcon;
 
             public Styles()
             {
@@ -37,6 +38,7 @@ namespace RenownedGames.ExLibEditor
                 buttonNormalTexture = CreateTexture(new Color32(64, 64, 64, 255), Color.black);
                 buttonHoverTexture = CreateTexture(new Color32(70, 70, 70, 255), Color.black);
                 buttonPressTexture = CreateTexture(new Color32(80, 80, 80, 255), Color.black);
+                helpIcon = EditorGUIUtility.IconContent("_Help@2x");
             }
 
             /// <summary>
@@ -139,6 +141,14 @@ namespace RenownedGames.ExLibEditor
             }
 
             /// <summary>
+            /// Help icon in GUIContent representation.
+            /// </summary>
+            public GUIContent GetHelpIcon()
+            {
+                return helpIcon;
+            }
+
+            /// <summary>
             /// Create new square texture with border.
             /// </summary>
             public Texture2D CreateTexture(Color mainColor, Color borderColor)
@@ -176,20 +186,37 @@ namespace RenownedGames.ExLibEditor
         /// </summary>
         public readonly struct Integration
         {
+            /// <summary>
+            /// Name of integration package.
+            /// </summary>
             public readonly string name;
+
+            /// <summary>
+            /// URL of integration installer.
+            /// </summary>
             public readonly string url;
+
+            /// <summary>
+            /// Help or documentation of integration (url).
+            /// </summary>
+            public readonly string help;
+
+            /// <summary>
+            /// Integration dependencies (url)
+            /// </summary>
             public readonly string[] dependencies;
 
-            public Integration(string name, string url, string[] dependencies)
+            public Integration(string name, string url, string help, string[] dependencies)
             {
                 this.name = name;
                 this.url = url;
+                this.help = help;
                 this.dependencies = dependencies;
             }
 
             public override string ToString()
             {
-                return $"[name = \"{name}\", package = \"{url}\", dependencies = \"{dependencies?.Length ?? 0}\"]";
+                return $"[name = \"{name}\", url = \"{url}\", help = \"{url}\", dependencies = \"{dependencies?.Length ?? 0}\"]";
             }
         }
 
@@ -199,6 +226,7 @@ namespace RenownedGames.ExLibEditor
         private string searchText;
         private SearchField searchField;
         private Integration[] integrations;
+        private TextAsset manifest;
 
         /// <summary>
         /// Called when the window becomes enabled and active.
@@ -208,9 +236,7 @@ namespace RenownedGames.ExLibEditor
             styles = new Styles();
             searchField = new SearchField();
             searchText = string.Empty;
-
-            TextAsset manifest = EditorResources.LoadExact<TextAsset>(GetExactDirectory(), "Integrations/manifest.txt");
-            integrations = LoadIntegrations(manifest.ToString());
+            Refresh();
         }
 
         /// <summary>
@@ -218,11 +244,19 @@ namespace RenownedGames.ExLibEditor
         /// </summary>
         protected virtual void OnGUI()
         {
-            DrawToolbar();
-            DrawTitle();
-            DrawIntegrationList();
-            DrawFooter();
-            Repaint();
+            if(manifest != null)
+            {
+                DrawToolbar();
+                DrawTitle();
+                DrawIntegrationList();
+                DrawFooter();
+                Repaint();
+            }
+            else
+            {
+                Rect position = new Rect(0, 0, this.position.width, this.position.height);
+                GUI.Label(position, "Integration manifest not found...", EditorStyles.centeredGreyMiniLabel);
+            }
         }
 
         /// <summary>
@@ -274,13 +308,48 @@ namespace RenownedGames.ExLibEditor
             return !uri.IsAbsoluteUri;
         }
 
+        public void BrowseHelp(Integration integration)
+        {
+            if (!string.IsNullOrEmpty(integration.help))
+            {
+                Help.BrowseURL(integration.help);
+            }
+        }
+
+        /// <summary>
+        /// Refresh manifest file in editor resources.
+        /// </summary>
+        public void Refresh()
+        {
+            manifest = EditorResources.LoadExact<TextAsset>(GetExactDirectory(), "Integrations/manifest.txt");
+            if (manifest != null)
+            {
+                integrations = LoadIntegrations(manifest.ToString());
+            }
+        }
+
+        /// <summary>
+        /// Open current manifest with associated application..
+        /// </summary>
+        public void OpenManifest()
+        {
+            if(manifest != null)
+            {
+                AssetDatabase.OpenAsset(manifest);
+            }
+            else
+            {
+                Debug.LogError("Manifest file not found!");
+            }
+        }
+
         /// <summary>
         /// Load all integrations from manifest in convenient representation.
         /// </summary>
         /// <param name="manifest">Integrations manifest.</param>
         protected Integration[] LoadIntegrations(string manifest)
         {
-            const string PATTERN = @"\[name\s*=\s*""([^""]+)""\s*,\s*url\s*=\s*""([^""]+)""\s*,\s*dependencies\s*=\s*""([^""]+)""\]";
+            const string PATTERN = @"\[name\s*=\s*""([^""]+)""\s*,\s*url\s*=\s*""([^""]+)""(?:\s*,\s*help\s*=\s*""([^""]+)"")?(?:\s*,\s*dependencies\s*=\s*""([^""]+)"")?\]";
             MatchCollection matches = Regex.Matches(manifest, PATTERN);
 
             Integration[] integrations = new Integration[matches.Count];
@@ -289,7 +358,8 @@ namespace RenownedGames.ExLibEditor
                 Match match = matches[i];
                 string name = match.Groups[1].Value;
                 string url = match.Groups[2].Value;
-                string dependencies = match.Groups[3].Value;
+                string help = match.Groups[3].Value;
+                string dependencies = match.Groups[4].Value;
 
                 string[] dependencyList = dependencies.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
                 for (int j = 0; j < dependencyList.Length; j++)
@@ -297,7 +367,7 @@ namespace RenownedGames.ExLibEditor
                     dependencyList[j] = dependencyList[j].Trim();
                 }
 
-                integrations[i] = new Integration(name, url, dependencyList);
+                integrations[i] = new Integration(name, url, help, dependencyList);
             }
             return integrations;
         }
@@ -388,6 +458,16 @@ namespace RenownedGames.ExLibEditor
                     GUI.FocusControl(string.Empty);
                 }
 
+                EditorGUI.BeginDisabledGroup(string.IsNullOrEmpty(integration.help));
+                entryPosition.x -= 24;
+                entryPosition.width = 25;
+                if (GUI.Button(entryPosition, styles.GetHelpIcon(), styles.GetButtonStyle()))
+                {
+                    BrowseHelp(integration);
+                    GUI.FocusControl(string.Empty);
+                }
+                EditorGUI.EndDisabledGroup();
+
                 entryPosition.x = 0;
                 entryPosition.y = entryPosition.yMax - 1;
                 entryPosition.width = viewRect.width;
@@ -403,6 +483,17 @@ namespace RenownedGames.ExLibEditor
             Rect position = new Rect(-1, this.position.height - 22, this.position.width + 2, 22);
             GUI.Box(position, string.Empty, styles.GetEntryStyle());
         }
+
+        #region [IHasCustomMenu Implementation]
+        /// <summary>
+        /// Adds your custom menu items to an Editor Window.
+        /// </summary>
+        public void AddItemsToMenu(GenericMenu menu)
+        {
+            menu.AddItem(new GUIContent("Refresh"), false, Refresh);
+            menu.AddItem(new GUIContent("Open Manifest"), false, OpenManifest);
+        }
+        #endregion
 
         #region [Static]
         /// <summary>
