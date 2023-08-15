@@ -14,6 +14,18 @@ namespace RenownedGames.ExLibEditor
 {
     public static class HandlesUtility
     {
+        public static Color color
+        {
+            get
+            {
+                return Handles.color;
+            }
+            set
+            {
+                Handles.color = value;
+            }
+        }
+
         #region [Extension Methods]
         public static void DrawSegmentCap(Vector3 from, Vector3 to, float thickness = 1)
         {
@@ -33,6 +45,16 @@ namespace RenownedGames.ExLibEditor
         public static void DrawSphere(Vector3 position, float radius)
         {
             Handles.SphereHandleCap(0, position, Quaternion.identity, radius * 2f, EventType.Repaint);
+        }
+
+        public static void DrawWireCircle(Vector3 position, float radius, Vector3 normal, float thickness)
+        {
+            Handles.DrawWireDisc(position, normal, radius, thickness);
+        }
+
+        public static void DrawSolidCircle(Vector3 position, float radius, Vector3 normal)
+        {
+            Handles.DrawSolidDisc(position, normal, radius);
         }
         #endregion
     }
