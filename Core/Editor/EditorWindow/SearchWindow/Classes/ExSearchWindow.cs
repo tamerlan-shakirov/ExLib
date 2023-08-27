@@ -39,6 +39,7 @@ namespace RenownedGames.ExLibEditor.Windows
         }
 
         private string title = string.Empty;
+        private Texture2D emptyIcon;
         private SortType sortType = SortType.Directory | SortType.Alphabet;
         private List<Entry> entries = new List<Entry>();
 
@@ -148,6 +149,29 @@ namespace RenownedGames.ExLibEditor.Windows
         }
 
         /// <summary>
+        /// Add new indented entity.
+        /// </summary>
+        /// <param name="name">Name of none label.</param>
+        /// <param name="onSelect">Action which called after entry is selected.</param>
+        public void AddEntityIndented(string name, Action onSelect)
+        {
+            GUIContent content = new GUIContent(name, GetEmptyIcon());
+            AddEntry(content, onSelect);
+        }
+
+        /// <summary>
+        /// Add new indented entity.
+        /// </summary>
+        /// <param name="name">Name of none label.</param>
+        /// <param name="data">A user specified object for attaching application specific data to a search tree entry.</param>
+        /// <param name="onSelect">Action with data argument, which called after entry is selected.</param>
+        public void AddEntityIndented(string name, object data, Action<object> onSelect)
+        {
+            GUIContent content = new GUIContent(name, GetEmptyIcon());
+            AddEntry(content, data, onSelect);
+        }
+
+        /// <summary>
         /// Open search window.
         /// </summary>
         /// <param name="position">Window position in screen space.</param>
@@ -228,6 +252,21 @@ namespace RenownedGames.ExLibEditor.Windows
             }
 
             return 0;
+        }
+
+        /// <summary>
+        /// Get empty icon.
+        /// </summary>
+        private Texture GetEmptyIcon()
+        {
+            if(emptyIcon == null)
+            {
+                emptyIcon = new Texture2D(1, 1);
+                emptyIcon.SetPixel(0, 0, Color.clear);
+                emptyIcon.Apply();
+            }
+
+            return emptyIcon;
         }
 
         #region [Static Methods]
